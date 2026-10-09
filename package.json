@@ -1,0 +1,13 @@
+{
+  "name": "collect-the-little-moments",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A tiny romantic arcade platformer starring Mahmood & Nuwara.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "check": "node --check src/*.js && echo 'syntax OK'"
+  },
+  "engines": { "node": ">=18" }
+}

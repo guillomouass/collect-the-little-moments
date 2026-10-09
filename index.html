@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#BDE7FF">
+  <meta name="description" content="A tiny romantic sky platformer: help Mahmood collect five little moments on his way to Nuwara.">
+  <title>Collect the Little Moments</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23BDE7FF'/%3E%3Cpath d='M32 50C18 41 12 33 13 25c1-7 10-10 19-2 9-8 18-5 19 2 1 8-5 16-19 25z' fill='%23F58FB8' stroke='%23fff' stroke-width='3'/%3E%3C/svg%3E">
+  <!-- Optional nicer fonts; the game falls back to rounded system fonts when offline. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="game" role="img" aria-label="Game view: a dreamy pastel-blue sky with floating cloud platforms"></canvas>
+
+    <!-- ── Start screen ─────────────────────────────── -->
+    <section id="screen-start" class="screen-start" aria-labelledby="game-title">
+      <div class="start-top">
+        <p id="dedication" class="dedication" hidden></p>
+        <h1 id="game-title" class="title">
+          <span class="t-small">Collect the</span>
+          <span class="t-big">Little Moments</span>
+        </h1>
+        <p id="subtitle" class="subtitle"></p>
+      </div>
+      <div id="hero-spot" class="hero-spot" aria-hidden="true"></div>
+      <div class="start-bottom">
+        <button id="btn-play" class="btn btn-primary btn-play" type="button">Let's play 💙</button>
+        <div class="start-aux">
+          <button id="btn-sound-start" class="icon-btn js-sound" type="button" aria-label="Sound on" aria-pressed="true"></button>
+          <button id="btn-info" class="icon-btn" type="button" aria-label="How to play">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 10.6v6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="7.3" r="1.5" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── HUD ──────────────────────────────────────── -->
+    <header id="hud" class="hud" hidden>
+      <div class="pill hud-title" aria-hidden="true">
+        <svg class="hud-logo" viewBox="0 0 24 24"><path d="M12 20.5C5.6 16.4 3 12.8 3.4 9.3 3.9 5.9 8 4.5 12 8c4-3.5 8.1-2.1 8.6 1.3.4 3.5-2.2 7.1-8.6 11.2z"/></svg>
+        <span>Little Moments</span>
+      </div>
+      <div class="pill hud-hearts" role="status" aria-live="polite" aria-label="Hearts collected: 0 of 5">
+        <span id="hud-slots" class="hud-slots" aria-hidden="true"></span>
+        <span id="hud-count" class="hud-count" aria-hidden="true">0/5</span>
+      </div>
+      <div class="hud-actions">
+        <button id="btn-pause" class="icon-btn" type="button" aria-label="Pause">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5.5" width="3.8" height="13" rx="1.6" fill="currentColor"/><rect x="13.7" y="5.5" width="3.8" height="13" rx="1.6" fill="currentColor"/></svg>
+        </button>
+        <button id="btn-restart" class="icon-btn" type="button" aria-label="Restart">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 12a6.5 6.5 0 1 0 2-4.7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M5 4.6v4.2h4.2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button id="btn-sound" class="icon-btn js-sound" type="button" aria-label="Sound on" aria-pressed="true"></button>
+      </div>
+    </header>
+
+    <!-- ── Touch controls ───────────────────────────── -->
+    <div id="touch" class="touch" aria-hidden="true">
+      <div id="dpad" class="dpad">
+        <span class="d-left"><svg viewBox="0 0 24 24"><path d="M15 5.5 8.5 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="d-right"><svg viewBox="0 0 24 24"><path d="M9 5.5 15.5 12 9 18.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>
+      <div id="touch-jump" class="touch-jump">
+        <svg viewBox="0 0 24 24"><path d="M5.5 15 12 8.5l6.5 6.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Jump</span>
+      </div>
+    </div>
+
+    <!-- ── Floating messages ────────────────────────── -->
+    <div id="tutorial" class="tutorial is-hidden" role="status">
+      <p id="tutorial-text"></p>
+      <p id="tutorial-keys" class="keys"></p>
+    </div>
+    <div id="toast" class="toast is-hidden" role="status" aria-live="polite"></div>
+    <div id="banner" class="banner is-hidden" aria-live="polite"></div>
+
+    <!-- ── Heart message card ───────────────────────── -->
+    <div id="overlay-message" class="overlay" hidden>
+      <div class="card card-message" role="dialog" aria-modal="true" aria-labelledby="msg-title" aria-describedby="msg-text">
+        <svg class="card-heart" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC8DD"/><stop offset="1" stop-color="#F07AAD"/></linearGradient>
+          </defs>
+          <path d="M32 54C16 44 9 35 10 26c1-8 11-12 22-3 11-9 21-5 22 3 1 9-6 18-22 28z" fill="url(#hg)" stroke="#fff" stroke-width="3"/>
+          <ellipse cx="22" cy="25" rx="5" ry="3" fill="#fff" opacity=".75" transform="rotate(-35 22 25)"/>
+        </svg>
+        <p id="msg-kicker" class="card-kicker"></p>
+        <h2 id="msg-title"></h2>
+        <p id="msg-text" class="msg"></p>
+        <button id="btn-continue" class="btn btn-primary" type="button">Continue 💙</button>
+      </div>
+    </div>
+
+    <!-- ── Pause / confirm restart ──────────────────── -->
+    <div id="overlay-pause" class="overlay" hidden>
+      <div class="card card-menu" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+        <div id="pause-main" class="pause-view">
+          <h2 id="pause-title">Paused</h2>
+          <p class="card-sub">Take your time. The clouds will wait. ☁️</p>
+          <div class="stack">
+            <button id="btn-resume" class="btn btn-primary" type="button">Resume</button>
+            <button id="btn-pause-restart" class="btn btn-soft" type="button">Restart level</button>
+            <button id="btn-pause-sound" class="btn btn-soft js-sound-text" type="button" aria-pressed="true">Sound: on</button>
+            <button id="btn-pause-help" class="btn btn-soft" type="button">How to play</button>
+          </div>
+        </div>
+        <div id="pause-confirm" class="pause-view" hidden>
+          <h2 id="confirm-title">Start over?</h2>
+          <p class="card-sub">Your hearts will reset and Mahmood goes back to the very first cloud.</p>
+          <div class="stack">
+            <button id="btn-confirm-restart" class="btn btn-primary" type="button">Yes, start over</button>
+            <button id="btn-cancel-restart" class="btn btn-soft" type="button">Keep playing</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── How to play ──────────────────────────────── -->
+    <div id="overlay-info" class="overlay" hidden>
+      <div class="card card-menu" role="dialog" aria-modal="true" aria-labelledby="info-title">
+        <h2 id="info-title">How to play</h2>
+        <ul class="howto">
+          <li><span class="howto-keys"><kbd>←</kbd><kbd>→</kbd> or <kbd>A</kbd><kbd>D</kbd></span><span>Move</span></li>
+          <li><span class="howto-keys"><kbd>Space</kbd> <kbd>W</kbd> <kbd>↑</kbd></span><span>Jump (hold for higher)</span></li>
+          <li><span class="howto-keys"><kbd>Esc</kbd></span><span>Pause</span></li>
+          <li><span class="howto-keys"><kbd>R</kbd> · <kbd>M</kbd></span><span>Restart · Sound</span></li>
+          <li class="howto-touch"><span class="howto-keys">◀ ▶ · Jump</span><span>On phones and tablets</span></li>
+        </ul>
+        <p id="info-goal" class="card-sub"></p>
+        <button id="btn-info-close" class="btn btn-primary" type="button">Got it 💙</button>
+      </div>
+    </div>
+
+    <!-- ── Ending ──────────────────────────────────── -->
+    <section id="ending" class="ending" hidden aria-live="polite">
+      <div id="ending-panel" class="ending-panel"></div>
+    </section>
+
+    <div id="fade" class="fade" aria-hidden="true"></div>
+    <div id="sr-live" class="sr-only" aria-live="polite"></div>
+    <noscript><p class="noscript">This little game needs JavaScript to run. 💙</p></noscript>
+  </div>
+
+  <script src="src/config.js"></script>
+  <script src="src/util.js"></script>
+  <script src="src/audio.js"></script>
+  <script src="src/input.js"></script>
+  <script src="src/level.js"></script>
+  <script src="src/player.js"></script>
+  <script src="src/characters.js"></script>
+  <script src="src/particles.js"></script>
+  <script src="src/world.js"></script>
+  <script src="src/camera.js"></script>
+  <script src="src/ending.js"></script>
+  <script src="src/ui.js"></script>
+  <script src="src/game.js"></script>
+</body>
+</html>
